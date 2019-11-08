@@ -1,0 +1,54 @@
+{{#if users}}
+    <h2 class='centered'>{{users.length}} Registered Users</h2>
+    <div class='centered'>
+        <input placeholder="Search" oninput="searchTable(this);"/>
+    </div>
+    <table id='user-list' class='view-list'>
+        <thead>
+        <tr>
+            <th><span onclick='sortTable(this)'>Name</span></th>
+            <th><span onclick='sortTable(this)'>Email</span></th>
+            <th><span onclick='sortTable(this)'>Phone</span></th>
+            <th><span onclick='sortTable(this)'>Location</span></th>
+            {{#if user.role.admin}}
+            <th><span onclick='sortTable(this)'>Manager</span></th>
+            {{/if}}
+            {{#if user.role.super}}
+            <th><span onclick='sortTable(this)'>Role</span></th>
+            <th><span onclick='sortTable(this)'>Registered</span></th>
+            {{/if}}
+        </tr>
+        </thead>
+        <tbody>
+    {{#each users}}
+        <tr style='background:#DEF;'>
+            <td><a href='/users/view?id={{_id}}'>{{name}}</a></td>
+            <td><a href='mailto:{{email}}'>{{email}}</a></td>
+            <td class='bulk-format'><span>{{phone1}}</span><span>{{phone2}}</span></td>
+            <td>{{location}}</td>
+            {{#if ../user.role.admin}}
+            <td><a href="/users/view?id={{manager._id}}">{{manager.name}}</a></td>
+            {{/if}}
+            {{#if ../user.role.super}}
+                <td>
+                {{#if role.master}}
+                    Gatekeeper
+                {{else if role.super}}
+                    SuperManager
+                {{else if role.admin}}
+                    Manager
+                {{else}}
+                    User
+                {{/if}}
+                </td>
+                <td>{{formatDate registered}}</td>
+            {{/if}}
+        </tr>
+    {{/each}}
+        </tbody>
+    </table>
+        <script type="text/javascript" src="/js/tableFunctions.js"></script>
+{{else}}
+    <h4 class='error'>No Users</h4>
+    <a class='centered' href='/users/new'>Create One</a>
+{{/if}}

@@ -1,0 +1,28 @@
+<form id="register" class="collapse centered" action="/register" method="post">
+    <div class="left">
+        <fieldset>
+            <legend>Registration</legend>
+            <div>
+                <label for="username">Username:</label></br>
+                <input type="text" name="username" value='{{info.username}}' required/>
+            </div>
+            <div>
+                <label for="email">Email:</label></br>
+                <input type="email" name="email" value='{{info.email}}' required/>
+            </div>
+            <div>
+                <label for="name">Name:</label></br>
+                <input type="text" name="name" value='{{info.name}}' required/>
+            </div>
+            <div>
+                <label for="password1">Password:</label></br>
+                <input type="password" name="password1" required/>
+            </div>
+            <div>
+                <label for="password2">Re-Enter Password:</label></br>
+                <input type="password" name="password2" required/>
+            </div>
+                <input type="submit" class="btn btn-primary btn-sm" value="Register"/>
+        </fieldset>
+    </div>
+</form>

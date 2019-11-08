@@ -1,0 +1,9 @@
+<div class='container centered'>
+    <h1>{{title}}</h1>
+    {{#if user}}
+        <p>Welcome {{user.name}}</p>
+    {{else}}
+        <p>Welcome to {{title}}</p>
+        <p>Please <a href='/login'>sign-in</a> or <a href='/register'>sign-up</a></p>
+    {{/if}}
+</div>

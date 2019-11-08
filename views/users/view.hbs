@@ -1,0 +1,206 @@
+<div id="userinfo-container" class="centered">
+    <div class="left">
+        <fieldset>
+            <legend>{{userinfo.name}}</legend>
+            {{#if userinfo.phone1}}
+                <div>
+                    <label for="phone1">Phone1</label></br>
+                    <input type="tel" name="phone1" value="{{userinfo.phone1}}" readonly="readonly"/>
+                </div>
+            {{/if}}
+            {{#if userinfo.phone2}}
+                <div>
+                    <label for="phone2">Phone2</label></br>
+                    <input type="tel" name="phone2" value="{{userinfo.phone2}}" readonly="readonly"/>
+                </div>
+            {{/if}}
+            {{#if userinfo.location}}
+                <div>
+                    <label for="phone2">Location</label></br>
+                    <input type="text" name="location" value="{{userinfo.location}}" readonly="readonly"/>
+                </div>
+            {{/if}}
+        </fieldset>
+    </div><div class="right">
+    <fieldset>
+            <Legend>Info</Legend>
+                <div>
+                    <a href="mailto:{{userinfo.email}}">{{userinfo.email}}</a>
+                </div>
+            {{#if userinfo.manager}}
+                <div>
+                    <label>Manager:</label>
+                {{#if user.role.super}}
+                    {{#unless isMe}}
+                        <button onclick="changeManager(this.parentElement);">Change</button></br>
+                    {{/unless}}
+                {{/if}}
+                    <a href="/users/view?id={{userinfo.manager._id}}">{{userinfo.manager.name}}</a>
+                </div>
+            {{else if user.role.super}}
+                {{#unless isMe}}
+                    <div>
+                        <form id="assign-manager" class="super-list" method="POST" action="/users/edit?id={{userinfo._id}}">
+                            <button onclick="addManager(this.parentElement);">Add Manager</button>
+                        </form>
+                    </div>
+                {{/unless}}
+            {{/if}}
+            {{#if user.role.admin}}
+                <div id="user-role">
+                    <label>Role:</label></br>
+                    {{#if userinfo.role.master}}
+                        <span>Gatekeeper</span>
+                    {{else if userinfo.role.super}}
+                        <span>SuperManager</span>
+                    {{else if userinfo.role.admin}}
+                        <span>Manager</span>
+                    {{else}}
+                        <span>User</span>
+                    {{/if}}
+                    {{#if user.role.super}}
+                        {{#unless isMe}}
+                            <form id="change-role" class="super-list" method="POST" action="/users/edit?id={{userinfo._id}}">
+                                <button onclick="changeRole(this.parentElement);">Change Role</button>
+                            </form>
+                        {{/unless}}
+                    {{/if}}
+                </div>
+            {{/if}}
+        </fieldset>
+        {{#if user.role.admin}}
+            {{#if userinfo.manages}}
+            <fieldset class="centered">
+                <Legend>Manages</Legend>
+                <div class="super-list">
+                {{#each userinfo.manages}}
+                    <a href="/users/view?id={{_id}}">{{name}}</a></br>
+                {{/each}}
+                </div>
+            </fieldset>
+            {{/if}}
+        {{/if}}
+    </div>
+</div>
+{{#if user.role.super}}
+    {{#unless isMe}}
+        <script type="text/javascript">
+            function changeRole(ele) {
+                while (ele.firstChild) {
+                    ele.removeChild(ele.firstChild);
+                }
+                var roles = ele;
+                //var searchInput = document.createElement("input");
+                //searchInput.placeholder = 'Search';
+                //managerSet.insertBefore(searchInput, ele);
+                var newDiv = document.createElement('div');
+                roles.append(newDiv);
+                newDiv.id = "role-list";
+                var availRoles = ["User", "Manager", "SuperManager"];
+                {{#if user.role.master}}
+                    availRoles.push("Gatekeeper");
+                {{/if}}
+                for (var index = 0; index < availRoles.length; index++) {
+                    var newLabel = document.createElement("label");
+                    newLabel.className = "checkcontainer";
+                    var newInput = document.createElement("input");
+                    newInput.type = "radio";
+                    newInput.name = "role";
+                    newInput.value = index;
+                    if (ele.previousElementSibling.textContent == availRoles[index]) {
+                        newInput.checked = true;
+                    }
+                    newLabel.appendChild(newInput);
+                    newLabel.appendChild(document.createTextNode(availRoles[index]));
+                    newLabel.appendChild(document.createElement("br"));
+                    newLabel.style.width = "100%";
+                    newDiv.appendChild(newLabel);
+                }
+                ele.parentElement.removeChild(ele.previousElementSibling);
+                var newSaveButton = document.createElement("input");
+                newSaveButton.type="submit";
+                newSaveButton.className="btn btn-primary btn-sm";
+                newSaveButton.value="Save";
+                ele.appendChild(newSaveButton);
+            }
+
+            function addManager(ele) {
+                while (ele.firstChild) {
+                    ele.removeChild(ele.firstChild);
+                }
+                var managerSet = ele;
+                //var searchInput = document.createElement("input");
+                //searchInput.placeholder = 'Search';
+                //managerSet.insertBefore(searchInput, ele);
+                var newDiv = document.createElement('div');
+                managerSet.append(newDiv);
+                newDiv.id = "manager-list";
+                var newLabel = document.createElement("label");
+                newLabel.className = "checkcontainer";
+                var newInput = document.createElement("input");
+                newInput.type = "radio";
+                newInput.name = "manager";
+                newInput.value = undefined;
+                newLabel.appendChild(newInput);
+                newLabel.appendChild(document.createTextNode("None"));
+                newLabel.appendChild(document.createElement("br"));
+                newLabel.style.width = "100%";
+                newDiv.appendChild(newLabel);
+                {{#if userinfo.role.super}}
+                    socket.emit("fetch", "SuperManagers");
+                {{else}}
+                    socket.emit("fetch", "Managers");
+                {{/if}}
+            }
+            function changeManager(ele) {
+                var newForm = document.createElement("form");
+                newForm.setAttribute("id", "assign-manager");
+                newForm.setAttribute("class", "super-list");
+                newForm.setAttribute("method", "POST");
+                newForm.setAttribute("action", "/users/edit?id={{userinfo._id}}");
+                while (ele.firstChild) {
+                    ele.removeChild(ele.firstChild);
+                }
+                ele.appendChild(newForm);
+                addManager(newForm);
+            }
+            socket.on("Managers", function(data) {
+                var managerList = document.getElementById("manager-list");
+                for (var index = 0; index < data.length; index++) {
+                    if (data[index]._id == '{{userinfo._id}}') {
+                        continue;
+                    }
+                    var newLabel = document.createElement("label");
+                    newLabel.className = "checkcontainer";
+                    var newInput = document.createElement("input");
+                    newInput.value = data[index]._id;
+                    newInput.name = "manager";
+                    newInput.type = "radio";
+                    newLabel.appendChild(newInput);
+                    newLabel.appendChild(document.createTextNode(data[index].name + " " + data[index].email));
+                    newLabel.appendChild(document.createElement("br"));
+                    newLabel.style.width = "100%";
+                    if (data[index]._id == '{{user._id}}') {
+                        managerList.prepend(newLabel);
+                        newInput.checked = true;
+                    } else {
+                        managerList.appendChild(newLabel);
+                    }
+                }
+                var newSaveButton = document.createElement("input");
+                newSaveButton.type="submit";
+                newSaveButton.className="btn btn-primary btn-sm";
+                newSaveButton.value="Save";
+                managerList.parentElement.appendChild(newSaveButton);
+            });
+        </script>
+    {{/unless}}
+{{/if}}
+<script type="text/javascript">
+    socket.on("updated", function(data) {
+        if (data == '{{userinfo._id}}') {
+            var topmsg = document.getElementById("update-msg").firstElementChild;
+            topmsg.textContent = "User info has updated. Please refresh the page.";
+        }
+    });
+</script>

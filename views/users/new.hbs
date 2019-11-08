@@ -1,0 +1,87 @@
+<form id="newuser" class="collapse centered" action="/invite" method="post">
+    <div class="left">
+        <fieldset>
+            <legend>Invite User</legend>
+            <div>
+                <label for="email">Email:</label></br>
+                <input class="hundred" type="email" name="email" required="required"/>
+            </div>
+            <div id="assign-manager" class="super-list">
+                <label for="manager">Manager:</label>
+                <button onclick="addManager();">Select Manager</button>
+            </div>
+            {{#if user.role.admin}}
+            <div>
+                <label for="role">Assign Role:</label></br>
+                <label class="roles">
+                    <input type="radio" name="role" value="0" checked="checked"/>User
+                </label></br>
+                <label class="roles">
+                    <input type="radio" name="role" value="1"/>Manager
+                </label>
+                {{#if user.role.super}}</br>
+                    <label class="roles">
+                        <input type="radio" name="role" value="2"/>SuperManager
+                    </label>
+                {{/if}}
+                {{#if SuperMaster}}</br>
+                    <label class="roles">
+                        <input type="radio" name="role" value="3"/>Gatekeeper
+                    </label>
+                {{/if}}
+            </div>
+            {{/if}}
+            <div>
+                <label>
+                    <input type="checkbox" name="silent" value="true"/>Silent Invite
+                </label>
+            </div>
+            <input type="submit" class="btn btn-primary btn-sm" value="Invite"/>
+        </fieldset>
+    </div>
+</form>
+<script type="text/javascript">
+function addManager() {
+    var managerSet = document.getElementById("assign-manager");
+    managerSet.removeChild(managerSet.lastElementChild);
+    var newDiv = document.createElement('div');
+    managerSet.appendChild(newDiv);
+    newDiv.id = "manager-list";
+    var newLabel = document.createElement("label");
+    newLabel.className = "checkcontainer";
+    var newInput = document.createElement("input");
+    newInput.type = "radio";
+    newInput.name = "manager";
+    newInput.value = undefined;
+    newInput.checked = true;
+    newLabel.appendChild(newInput);
+    newLabel.appendChild(document.createTextNode("None"));
+    newLabel.appendChild(document.createElement("br"));
+    newLabel.style.width = "100%";
+    newDiv.appendChild(newLabel);
+    socket.emit("fetch", "Managers");
+}
+
+socket.on("Managers", function(data) {
+    var managerList = document.getElementById("manager-list");
+    for (var index = 0; index < data.length; index++) {
+        var newDiv = document.createElement("div");
+        var newLabel = document.createElement("label");
+        newLabel.className = "checkcontainer";
+        var newInput = document.createElement("input");
+        newInput.value = data[index]._id;
+        newInput.name = "manager";
+        newInput.type = "radio";
+        newLabel.appendChild(newInput);
+        newLabel.appendChild(document.createTextNode(data[index].name + " " + data[index].email));
+        newLabel.appendChild(document.createElement("br"));
+        newLabel.style.width = "100%";
+        if (data[index]._id == '{{user._id}}') {
+            newDiv.prepend(newLabel);
+        } else {
+            newDiv.appendChild(newLabel);
+        }
+        managerList.appendChild(newDiv);
+    }
+});
+</script>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DIY Rack Build</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel='stylesheet' href='/css/style.css' />
+    {{#if user}}
+      <script type="text/javascript" src='/js/socket.io.js'></script>
+      <script type="text/javascript">
+          var socket = io();
+          socket.on('msg', function(data) {
+              document.getElementById('update-msg').firstElementChild.textContent = data;
+          });
+      </script>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li class="dropdown" style="float:right;">
+          <a href="javascript:void(0)" class="dropbtn">{{user.username}}</a>
+          <div class="dropdown-content" style="right:0;">
+            <a href="/">Home</a>
+            <a href="/users/view?id={{user._id}}">Profile</a>
+            <a href="/logout">Logout</a>
+          </div>
+        </li>
+      </ul>
+      <hr style="clear:both;border:none;margin:0;padding:0;">
+    </nav>
+    {{else}}
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li style="float:right;"><a href="/login">Login</a></li>
+        <li style="float:right;"><a href="/register">Register</a></li>
+      </ul>
+      <hr style="clear:both;border:none;margin:0;padding:0;">
+    </nav>
+    {{/if}}
+    <div id="update-msg" class="centered">
+        <h2 class="orange"></h2>
+    </div>
+    {{#if error}}
+        <h4 class='error'>{{{error}}}</h4>
+    {{/if}}
+    {{#if message}}
+        <h4 class='message'>{{{message}}}</h4>
+    {{/if}}
+    {{{body}}}
+
+    <!--
+    <footer>
+      {{#if user}}
+        <p>Welcome {{user.name}}</p>
+      {{else}}
+        <p>Please <a href='/login'>sign-in</a> or <a href='/register'>sign-up</a></p>
+      {{/if}}
+    </footer>-->
+  </body></html>
